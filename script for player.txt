@@ -1,0 +1,52 @@
+extends CharacterBody3D
+
+@export var speed := 4.0
+@export var gravity := 15
+@export var jump_strength := 6.0
+
+var direction := Vector3.ZERO
+var sprite : Sprite3D
+var animation_player : AnimationPlayer
+
+func _ready():
+    sprite = $Sprite3D
+    animation_player = $AnimationPlayer
+
+func _physics_process(delta):
+    direction = Vector3.ZERO
+
+    if Input.is_action_pressed("ui_right"):
+        direction.x += 1
+        sprite.scale.x = 0.2  # Escala positiva para mirar a la derecha
+    elif Input.is_action_pressed("ui_left"):
+        direction.x -= 1
+        sprite.scale.x = -0.2  # Escala negativa para mirar a la izquierda
+    if Input.is_action_pressed("ui_up"):
+        direction.z -= 1
+    elif Input.is_action_pressed("ui_down"):
+        direction.z += 1
+
+    direction = direction.normalized() * speed
+
+    if is_on_floor():
+        if Input.is_action_just_pressed("ui_select"):  # Detecta si la tecla de salto fue presionada
+            velocity.y = jump_strength
+            animation_player.play("Jump")
+        elif Input.is_action_just_pressed("ui_attack"):  # Detecta si se presiona la tecla de ataque
+            attack()
+        elif direction != Vector3.ZERO:
+            animation_player.play("Walk")
+        else:
+            animation_player.play("Idle")
+    else:
+        velocity.y -= gravity * delta
+
+    velocity.x = direction.x
+    velocity.z = direction.z
+
+    move_and_slide(velocity)
+
+func attack():
+    # Aquí puedes agregar la lógica de tu ataque, por ejemplo:
+    animation_player.play("Atk1")
+    # Aquí podrías añadir la lógica de detección de colisiones o efectos del ataque
